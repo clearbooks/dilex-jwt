@@ -43,6 +43,16 @@ class JwtGuardTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function givenUnauthorisedRequest_returnError()
+    {
+        $guard = new JwtGuard( new JwtGuard\RequestAuthoriserStub( false ) );
+        $this->assertContains( 'error', array_keys( json_decode( $guard->execute( new Request )->getContent(), true ) ) );
+
+    }
+
+    /**
+     * @test
+     */
     public function givenValidRequest_whenExecuting_returnNull()
     {
         $guard = new JwtGuard( new JwtGuard\RequestAuthoriserStub( true ) );

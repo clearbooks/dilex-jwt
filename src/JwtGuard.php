@@ -23,13 +23,13 @@ class JwtGuard implements Middleware
     /**
      * Authorise this request
      * @param Request $request
-     * @return null|JsonResponse
+     * @return JsonResponse|null
      */
     public function execute( Request $request )
     {
 
         if( !$this->authoriser->isAuthorised( $request ) ) {
-            return new JsonResponse('{"error": "Invalid token"}', 403);
+            return new JsonResponse( ['error' => 'Invalid token'], 403 );
         }
         return null;
     }
