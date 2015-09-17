@@ -1,0 +1,41 @@
+{
+    "name": "clearbooks/dilex-jwt",
+    "description": "JWT authentication middleware for Dilex",
+    "type": "project",
+    "require": {
+        "clearbooks/dilex": "^1.0",
+        "emarref/jwt": "^0.1.1"
+
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8"
+    },
+    "license": "LGPL-v3",
+    "authors": [
+        {
+            "name": "Crimson Ducks",
+            "email": "support@clearbooks.co.uk"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:clearbooks/dilex.git"
+        },
+        {
+            "type": "composer",
+            "url": "https://carefulcoder.co.uk/composer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Clearbooks\\Dilex\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Clearbooks\\Dilex\\": "test/"
+        }
+    },
+    "minimum-stability": "dev"
+}
