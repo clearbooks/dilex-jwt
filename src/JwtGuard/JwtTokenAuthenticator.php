@@ -128,6 +128,6 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
 
     public function getIsAdmin()
     {
-        return $this->getClaimOrNull( self::IS_ADMIN);
+        return (bool)$this->getClaimOrNull( self::IS_ADMIN);
     }
 }

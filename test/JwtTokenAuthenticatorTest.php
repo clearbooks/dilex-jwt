@@ -263,6 +263,15 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function givenTokenWithoutIsAdmin_whenGettingIsAdmin_returnFalse()
+    {
+        $this->authoriseToken($this->getTokenWithout([self::VALID_IS_ADMIN]));
+        $this->assertFalse($this->auth->getIsAdmin());
+    }
+
+    /**
+     * @test
+     */
     public function givenValidToken_whenSettingToken_getCorrectUserAndGroupIdAndIsAdmin()
     {
         $this->authoriseToken( $this->getValidToken() );
