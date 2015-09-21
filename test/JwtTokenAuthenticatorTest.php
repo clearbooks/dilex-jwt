@@ -20,6 +20,7 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
 {
     const USER_ID = '1';
     const GROUP_ID = '1';
+    const IS_ADMIN = true;
 
     const WITH = 0;
 
@@ -33,6 +34,8 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
 
     const VALID_EXPIRY_DATE = 3;
 
+    const VALID_IS_ADMIN = 4;
+
 
     /**
      * @var Hs512
@@ -43,6 +46,11 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
      * @var JwtTokenAuthenticator
      */
     private $auth;
+
+    /**
+     * @var Token
+     */
+    private $token;
 
     /**
      * @return string
@@ -65,7 +73,6 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param $withOrWithout
      * @param array $spec
      * @return Token
      */
@@ -75,7 +82,8 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
             self::VALID_USER_ID => new PublicClaim( 'userId', self::USER_ID ),
             self::VALID_GROUP_ID => new PublicClaim( 'groupId', self::GROUP_ID ),
             self::VALID_APP_ID => new PublicClaim( 'appId', 'labs' ),
-            self::VALID_EXPIRY_DATE => new PublicClaim('exp', $this->getNonExpiredDate())
+            self::VALID_EXPIRY_DATE => new PublicClaim('exp', $this->getNonExpiredDate()),
+            self::VALID_IS_ADMIN => new PublicClaim('isAdmin', self::IS_ADMIN)
         ];
 
         $spec = array_diff( array_keys( $mappings ), $spec );
@@ -255,10 +263,20 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function givenValidToken_whenSettingToken_getCorrectUserAndGroupId()
+    public function givenTokenWithoutIsAdmin_whenGettingIsAdmin_returnFalse()
+    {
+        $this->authoriseToken($this->getTokenWithout([self::VALID_IS_ADMIN]));
+        $this->assertFalse($this->auth->getIsAdmin());
+    }
+
+    /**
+     * @test
+     */
+    public function givenValidToken_whenSettingToken_getCorrectUserAndGroupIdAndIsAdmin()
     {
         $this->authoriseToken( $this->getValidToken() );
         $this->assertEquals(self::GROUP_ID, $this->auth->getGroupId());
         $this->assertEquals(self::USER_ID, $this->auth->getUserId());
+        $this->assertEquals(self::IS_ADMIN, $this->auth->getIsAdmin());
     }
 }
