@@ -35,7 +35,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     /**
      * @param Jwt $jwt
      * @param AlgorithmInterface $algorithm
-=     */
+     */
     public function __construct( Jwt $jwt, AlgorithmInterface $algorithm, AppIdProvider $appIdProvider )
     {
         $this->jwt = $jwt;
