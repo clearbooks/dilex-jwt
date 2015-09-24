@@ -28,16 +28,21 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
      * @var Token
      */
     private $token;
+    /**
+     * @var AppIdProvider
+     */
+    private $appIdProvider;
 
     /**
      * @param Jwt $jwt
      * @param AlgorithmInterface $algorithm
-=     */
-    public function __construct( Jwt $jwt, AlgorithmInterface $algorithm )
+     */
+    public function __construct( Jwt $jwt, AlgorithmInterface $algorithm, AppIdProvider $appIdProvider )
     {
         $this->jwt = $jwt;
         $this->algorithm = $algorithm;
         $this->token = new Token;
+        $this->appIdProvider = $appIdProvider;
     }
 
     /**
@@ -74,9 +79,9 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
      * Is this token for labs
      * @return bool
      */
-    private function isLabsToken()
+    private function isAllowedAppId()
     {
-        return $this->getClaimOrNull( self::APP_ID ) === 'labs';
+        return in_array( $this->getClaimOrNull( self::APP_ID ), $this->appIdProvider->getAppIds() );
     }
 
     /**
@@ -97,7 +102,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
             return false;
         }
 
-        if( $this->isExpired() || !$this->hasUserId() || !$this->isLabsToken() ) {
+        if( $this->isExpired() || !$this->hasUserId() || !$this->isAllowedAppId() ) {
             return false;
         }
 

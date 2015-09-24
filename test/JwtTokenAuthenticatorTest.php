@@ -20,6 +20,7 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
 {
     const USER_ID = '1';
     const GROUP_ID = '1';
+    const APP_ID = 'test';
     const IS_ADMIN = true;
 
     const WITH = 0;
@@ -53,6 +54,11 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
     private $token;
 
     /**
+     * @var AppIdProvider
+     */
+    private $appIds;
+
+    /**
      * @return string
      */
     private function getNonExpiredDate()
@@ -81,7 +87,7 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $mappings = [
             self::VALID_USER_ID => new PublicClaim( 'userId', self::USER_ID ),
             self::VALID_GROUP_ID => new PublicClaim( 'groupId', self::GROUP_ID ),
-            self::VALID_APP_ID => new PublicClaim( 'appId', 'labs' ),
+            self::VALID_APP_ID => new PublicClaim( 'appId', self::APP_ID ),
             self::VALID_EXPIRY_DATE => new PublicClaim('exp', $this->getNonExpiredDate()),
             self::VALID_IS_ADMIN => new PublicClaim('isAdmin', self::IS_ADMIN)
         ];
@@ -162,8 +168,9 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
+        $this->appIds = new StaticAppIdProvider( [self::APP_ID] );
         $this->algorithm = new Hs512( "shhh... it's a secret" );
-        $this->auth = new JwtTokenAuthenticator( new Jwt, $this->algorithm );
+        $this->auth = new JwtTokenAuthenticator( new Jwt, $this->algorithm, $this->appIds );
         $this->token = new Token();
     }
 
@@ -172,7 +179,7 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function givenNoneAlgorithm_returnFalse()
     {
-        $auth = new JwtTokenAuthenticator( $jwt = new Jwt, new None );
+        $auth = new JwtTokenAuthenticator( $jwt = new Jwt, new None, $this->appIds );
         $this->assertFalse( $auth->isAuthorised( new MockTokenRequest( $jwt->serialize( new Token, EncryptionFactory::create( new None ) ) ) ) );
     }
 
@@ -256,7 +263,7 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function givenTokenWithInvalidSignature_whenValidatingToken_returnFalse()
     {
-        $this->auth = new JwtTokenAuthenticator( new Jwt, new Hs512( 'Nope' ) );
+        $this->auth = new JwtTokenAuthenticator( new Jwt, new Hs512( 'Nope' ), $this->appIds );
         $this->assertFalse( $this->authoriseToken( $this->getValidToken() ) );
     }
 
