@@ -17,6 +17,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     const GROUP_ID = 'groupId';
     const APP_ID = 'appId';
     const EXPIRY = 'exp';
+    const IS_ADMIN = 'isAdmin';
 
     /**
      * @var AlgorithmInterface
@@ -128,5 +129,10 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     public function getGroupId()
     {
         return $this->getClaimOrNull( self::GROUP_ID );
+    }
+
+    public function getIsAdmin()
+    {
+        return (bool)$this->getClaimOrNull( self::IS_ADMIN);
     }
 }

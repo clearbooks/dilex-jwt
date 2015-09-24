@@ -6,4 +6,6 @@ interface IdentityProvider
     public function getUserId();
 
     public function getGroupId();
+
+    public function getIsAdmin();
 }
