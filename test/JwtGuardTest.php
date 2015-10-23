@@ -6,12 +6,10 @@
  * Time: 11:44
  */
 
-namespace Authentication;
+namespace Clearbooks\Dilex\JwtGuard;
 
 
 use Clearbooks\Dilex\JwtGuard;
-use Emarref\Jwt\Algorithm\Hs512;
-use Emarref\Jwt\Algorithm\None;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -58,4 +56,15 @@ class JwtGuardTest extends \PHPUnit_Framework_TestCase
         $guard = new JwtGuard( new JwtGuard\RequestAuthoriserStub( true ) );
         $this->assertNull($guard->execute($this->request));
     }
+
+    /**
+     * @test
+     */
+    public function givenInvalidRequest_AndControllerDoesNotRequireJwt_whenExecuting_returnNull()
+    {
+        $guard = new JwtGuard( new JwtGuard\RequestAuthoriserStub( false ) );
+        $this->request->attributes->set('_controller', MockNoJwtRequiredController::class );
+        $this->assertNull($guard->execute($this->request));
+    }
+
 }
