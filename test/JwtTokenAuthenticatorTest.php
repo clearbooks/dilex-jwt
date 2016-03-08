@@ -7,6 +7,7 @@
  */
 
 namespace Clearbooks\Dilex\JwtGuard;
+
 use DateTime;
 use Emarref\Jwt\Algorithm\Hs512;
 use Emarref\Jwt\Algorithm\None;
@@ -37,6 +38,8 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
 
     const VALID_IS_ADMIN = 4;
 
+    const VALID_SEGMENTS = 5;
+
 
     /**
      * @var Hs512
@@ -57,6 +60,11 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
      * @var AppIdProvider
      */
     private $appIds;
+
+    /**
+     * @var array
+     */
+    private $testSegments;
 
     /**
      * @return string
@@ -89,7 +97,8 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
             self::VALID_GROUP_ID => new PublicClaim( 'groupId', self::GROUP_ID ),
             self::VALID_APP_ID => new PublicClaim( 'appId', self::APP_ID ),
             self::VALID_EXPIRY_DATE => new PublicClaim('exp', $this->getNonExpiredDate()),
-            self::VALID_IS_ADMIN => new PublicClaim('isAdmin', self::IS_ADMIN)
+            self::VALID_IS_ADMIN => new PublicClaim('isAdmin', self::IS_ADMIN),
+            self::VALID_SEGMENTS => new PublicClaim('segments', $this->testSegments)
         ];
 
         $spec = array_diff( array_keys( $mappings ), $spec );
@@ -123,6 +132,14 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
     private function getTokenWithNoGroupId()
     {
         return $this->getTokenWithout( [self::VALID_GROUP_ID] );
+    }
+
+    /**
+     * @return Token
+     */
+    private function getTokenWithoutSegments()
+    {
+        return $this->getTokenWithout( [self::VALID_SEGMENTS] );
     }
 
     /**
@@ -172,6 +189,7 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $this->algorithm = new Hs512( "shhh... it's a secret" );
         $this->auth = new JwtTokenAuthenticator( new Jwt, $this->algorithm, $this->appIds );
         $this->token = new Token();
+        $this->testSegments = [ [ 'segmentId' => 1, 'isLocked' => false, 'priority' => 10 ] ];
     }
 
     /**
@@ -229,6 +247,14 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function givenTokenWithoutSegments_whenVerifyingToken_returnTrue()
+    {
+        $this->assertTrue( $this->authoriseToken( $this->getTokenWithoutSegments() ) );
+    }
+
+    /**
+     * @test
+     */
     public function givenExpiredToken_whenVerifyingToken_returnFalse()
     {
         $this->assertFalse( $this->authoriseToken( $this->getExpiredToken() ) );
@@ -279,11 +305,21 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function givenTokenWithoutSegments_whenGettingSegments_returnsEmptyArray()
+    {
+        $this->authoriseToken($this->getTokenWithout([self::VALID_SEGMENTS]));
+        $this->assertEmpty($this->auth->getSegments());
+    }
+
+    /**
+     * @test
+     */
     public function givenValidToken_whenSettingToken_getCorrectUserAndGroupIdAndIsAdmin()
     {
         $this->authoriseToken( $this->getValidToken() );
         $this->assertEquals(self::GROUP_ID, $this->auth->getGroupId());
         $this->assertEquals(self::USER_ID, $this->auth->getUserId());
         $this->assertEquals(self::IS_ADMIN, $this->auth->getIsAdmin());
+        $this->assertEquals($this->testSegments, $this->auth->getSegments());
     }
 }

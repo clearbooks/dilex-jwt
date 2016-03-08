@@ -18,6 +18,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     const APP_ID = 'appId';
     const EXPIRY = 'exp';
     const IS_ADMIN = 'isAdmin';
+    const SEGMENTS = 'segments';
 
     /**
      * @var AlgorithmInterface
@@ -28,6 +29,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
      * @var Token
      */
     private $token;
+
     /**
      * @var AppIdProvider
      */
@@ -36,6 +38,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     /**
      * @param Jwt $jwt
      * @param AlgorithmInterface $algorithm
+     * @param AppIdProvider $appIdProvider
      */
     public function __construct( Jwt $jwt, AlgorithmInterface $algorithm, AppIdProvider $appIdProvider )
     {
@@ -48,7 +51,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     /**
      * Get a claim if we have one or return null
      * @param string $claim the name of the claim
-     * @return string|null
+     * @return mixed
      */
     private function getClaimOrNull( $claim )
     {
@@ -131,8 +134,20 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
         return $this->getClaimOrNull( self::GROUP_ID );
     }
 
+    /**
+     * @return bool
+     */
     public function getIsAdmin()
     {
-        return (bool)$this->getClaimOrNull( self::IS_ADMIN);
+        return (bool)$this->getClaimOrNull( self::IS_ADMIN );
+    }
+
+    /**
+     * @return array
+     */
+    public function getSegments()
+    {
+        $segments = $this->getClaimOrNull( self::SEGMENTS );
+        return is_array( $segments ) ? $segments : [ ];
     }
 }
