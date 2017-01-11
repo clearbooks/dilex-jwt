@@ -158,11 +158,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
 
     private function extractJwtFromHeader( $header )
     {
-<<<<<<< Updated upstream
-        if( strpos( $header, self::BEARER ) !== false ){
-=======
         if( strpos( $header, self::BEARER ) === 0 ){
->>>>>>> Stashed changes
             return substr( $header, strlen( self::BEARER ) );
         }
         return $header;
