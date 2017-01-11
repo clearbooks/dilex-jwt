@@ -336,6 +336,14 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function givenValidTokenAndBearerStringPresentInRequestHeader_WhenCallingIsAuthorised_ThenAuthorisationPasses()
     {
-        $this->auth->isAuthorised( new MockTokenRequest( "Bearer ". $this->serialiseToken( $this->getValidToken() ) ) );
+        $this->assertTrue( $this->auth->isAuthorised( new MockTokenRequest( "Bearer ". $this->serialiseToken( $this->getValidToken() ) ) ) );
+    }
+
+    /**
+     * @test
+     */
+    public function givenValidTokenButHeaderIsInvalid_WhenCallingIsAuthorised_ThenAuthorisationFails()
+    {
+        $this->assertFalse( $this->auth->isAuthorised( new MockTokenRequest( " 🐟 should be broken ". $this->serialiseToken( $this->getValidToken() ) ) ) );
     }
 }

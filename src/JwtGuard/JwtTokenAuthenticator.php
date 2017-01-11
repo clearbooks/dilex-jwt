@@ -99,7 +99,11 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
         $context = new Context( EncryptionFactory::create( $this->algorithm ) );
 
         if ( $header ) {
-            $this->token = $this->jwt->deserialize( $this->extractJwtFromHeader($header) );
+            try{
+                $this->token = $this->jwt->deserialize( $this->extractJwtFromHeader($header) );
+            } catch ( \Exception $e ){
+                return false;
+            }
         }
 
         if ( $this->algorithm instanceof None ) {
@@ -154,7 +158,11 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
 
     private function extractJwtFromHeader( $header )
     {
+<<<<<<< Updated upstream
         if( strpos( $header, self::BEARER ) !== false ){
+=======
+        if( strpos( $header, self::BEARER ) === 0 ){
+>>>>>>> Stashed changes
             return substr( $header, strlen( self::BEARER ) );
         }
         return $header;
