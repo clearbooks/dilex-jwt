@@ -19,6 +19,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     const EXPIRY = 'exp';
     const IS_ADMIN = 'isAdmin';
     const SEGMENTS = 'segments';
+    const BEARER = 'Bearer ';
 
     /**
      * @var AlgorithmInterface
@@ -98,7 +99,11 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
         $context = new Context( EncryptionFactory::create( $this->algorithm ) );
 
         if ( $header ) {
-            $this->token = $this->jwt->deserialize( $header );
+            try{
+                $this->token = $this->jwt->deserialize( $this->extractJwtFromHeader($header) );
+            } catch ( \Exception $e ){
+                return false;
+            }
         }
 
         if ( $this->algorithm instanceof None ) {
@@ -149,5 +154,13 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     {
         $segments = $this->getClaimOrNull( self::SEGMENTS );
         return is_array( $segments ) ? $segments : [ ];
+    }
+
+    private function extractJwtFromHeader( $header )
+    {
+        if( strpos( $header, self::BEARER ) === 0 ){
+            return substr( $header, strlen( self::BEARER ) );
+        }
+        return $header;
     }
 }

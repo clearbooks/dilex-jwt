@@ -176,8 +176,16 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     private function authoriseToken( Token $token )
     {
-        $serialised = ( new Jwt )->serialize( $token, EncryptionFactory::create( $this->algorithm ) );
-        return $this->auth->isAuthorised( new MockTokenRequest( $serialised ) );
+        return $this->auth->isAuthorised( new MockTokenRequest( $this->serialiseToken( $token ) ) );
+    }
+
+    /**
+     * @param $token
+     * @return string
+     */
+    private function serialiseToken( $token )
+    {
+        return ( new Jwt )->serialize( $token, EncryptionFactory::create( $this->algorithm ) );
     }
 
     /**
@@ -321,5 +329,21 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::USER_ID, $this->auth->getUserId());
         $this->assertEquals(self::IS_ADMIN, $this->auth->getIsAdmin());
         $this->assertEquals($this->testSegments, $this->auth->getSegments());
+    }
+
+    /**
+     * @test
+     */
+    public function givenValidTokenAndBearerStringPresentInRequestHeader_WhenCallingIsAuthorised_ThenAuthorisationPasses()
+    {
+        $this->assertTrue( $this->auth->isAuthorised( new MockTokenRequest( "Bearer ". $this->serialiseToken( $this->getValidToken() ) ) ) );
+    }
+
+    /**
+     * @test
+     */
+    public function givenValidTokenButHeaderIsInvalid_WhenCallingIsAuthorised_ThenAuthorisationFails()
+    {
+        $this->assertFalse( $this->auth->isAuthorised( new MockTokenRequest( " 🐟 should be broken ". $this->serialiseToken( $this->getValidToken() ) ) ) );
     }
 }
