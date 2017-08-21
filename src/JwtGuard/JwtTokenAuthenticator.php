@@ -24,17 +24,17 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     /**
      * @var AlgorithmInterface
      */
-    private $algorithm;
+    protected $algorithm;
 
     /**
      * @var Token
      */
-    private $token;
+    protected $token;
 
     /**
      * @var AppIdProvider
      */
-    private $appIdProvider;
+    protected $appIdProvider;
 
     /**
      * @param Jwt $jwt
@@ -54,7 +54,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
      * @param string $claim the name of the claim
      * @return mixed
      */
-    private function getClaimOrNull( $claim )
+    protected function getClaimOrNull( $claim )
     {
         $claim = $this->token->getPayload()->findClaimByName( $claim );
         return $claim ? $claim->getValue() : null;
@@ -64,7 +64,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
      * Is this token expired
      * @return bool
      */
-    private function isExpired()
+    protected function isExpired()
     {
         $exp = \DateTime::createFromFormat( 'U', $this->getClaimOrNull( self::EXPIRY ) );
         return !$exp || $exp <= ( new DateTime );
@@ -74,7 +74,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
      * Does this token have a user id
      * @return bool
      */
-    private function hasUserId()
+    protected function hasUserId()
     {
         return (bool)$this->getClaimOrNull( self::USER_ID );
     }
@@ -83,7 +83,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
      * Is this token for labs
      * @return bool
      */
-    private function isAllowedAppId()
+    protected function isAllowedAppId()
     {
         return in_array( $this->getClaimOrNull( self::APP_ID ), $this->appIdProvider->getAppIds() );
     }
@@ -156,7 +156,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
         return is_array( $segments ) ? $segments : [ ];
     }
 
-    private function extractJwtFromHeader( $header )
+    protected function extractJwtFromHeader( $header )
     {
         if( strpos( $header, self::BEARER ) === 0 ){
             return substr( $header, strlen( self::BEARER ) );
