@@ -4,7 +4,7 @@
     "type": "project",
     "require": {
         "clearbooks/dilex": "^1.0",
-        "emarref/jwt": "^0.1.1"
+        "emarref/jwt": "^1.0.3"
 
     },
     "require-dev": {
