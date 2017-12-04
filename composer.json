@@ -4,7 +4,7 @@
     "type": "project",
     "require": {
         "clearbooks/dilex": "^1.0",
-        "emarref/jwt": "^0.1.1"
+        "emarref/jwt": "^1.0.3"
 
     },
     "require-dev": {
@@ -15,16 +15,6 @@
         {
             "name": "Crimson Ducks",
             "email": "support@clearbooks.co.uk"
-        }
-    ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:clearbooks/dilex.git"
-        },
-        {
-            "type": "composer",
-            "url": "https://carefulcoder.co.uk/composer"
         }
     ],
     "autoload": {
