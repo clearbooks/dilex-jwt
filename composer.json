@@ -17,16 +17,6 @@
             "email": "support@clearbooks.co.uk"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:clearbooks/dilex.git"
-        },
-        {
-            "type": "composer",
-            "url": "https://carefulcoder.co.uk/composer"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Clearbooks\\Dilex\\": "src/"
