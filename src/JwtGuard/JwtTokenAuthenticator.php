@@ -35,6 +35,10 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
      * @var AppIdProvider
      */
     protected $appIdProvider;
+    /**
+     * @var Jwt
+     */
+    protected $jwt;
 
     /**
      * @param Jwt $jwt
