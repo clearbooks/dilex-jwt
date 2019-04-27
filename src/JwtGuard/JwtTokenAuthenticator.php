@@ -20,6 +20,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     const IS_ADMIN = 'isAdmin';
     const SEGMENTS = 'segments';
     const BEARER = 'Bearer ';
+    const DB_ID = 'dbId';
 
     /**
      * @var AlgorithmInterface
@@ -137,6 +138,21 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
     public function getGroupId()
     {
         return $this->getClaimOrNull( self::GROUP_ID );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getDbId()
+    {
+        $result = $this->getClaimOrNull(self::DB_ID);
+
+        if ($result) {
+            // Not null. This value is expected to be an integer
+            $result = (int) $result;
+        }
+
+        return $result;
     }
 
     /**
