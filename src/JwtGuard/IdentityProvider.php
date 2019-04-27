@@ -22,4 +22,10 @@ interface IdentityProvider
      * @return array
      */
     public function getSegments();
+
+    /**
+     * @author Nicky Santamaria <nick.s@clearbooks.co.uk>
+     * @return int|null
+     */
+    public function getDbId();
 }
