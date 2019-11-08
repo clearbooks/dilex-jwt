@@ -15,9 +15,10 @@ use Emarref\Jwt\Claim\PublicClaim;
 use Emarref\Jwt\Encryption\Factory as EncryptionFactory;
 use Emarref\Jwt\Jwt;
 use Emarref\Jwt\Token;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
+class JwtTokenAuthenticatorTest extends TestCase
 {
     const USER_ID = '1';
     const GROUP_ID = '1';
@@ -191,7 +192,7 @@ class JwtTokenAuthenticatorTest extends \PHPUnit_Framework_TestCase
     /**
      * Set up
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->appIds = new StaticAppIdProvider( [self::APP_ID] );
         $this->algorithm = new Hs512( "shhh... it's a secret" );

@@ -10,15 +10,16 @@ namespace Clearbooks\Dilex\JwtGuard;
 
 
 use Clearbooks\Dilex\JwtGuard;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class JwtGuardTest extends \PHPUnit_Framework_TestCase
+class JwtGuardTest extends TestCase
 {
 
     private $request;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = new Request();
         $this->request->headers->set('Authorization', 'Token');
