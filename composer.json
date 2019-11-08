@@ -3,7 +3,7 @@
     "description": "JWT authentication middleware for Dilex",
     "type": "project",
     "require": {
-        "clearbooks/dilex": "^1.0",
+        "clearbooks/dilex": "*",
         "emarref/jwt": "^1.0.3"
 
     },
