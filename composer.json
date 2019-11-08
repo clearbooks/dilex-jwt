@@ -3,12 +3,13 @@
     "description": "JWT authentication middleware for Dilex",
     "type": "project",
     "require": {
-        "clearbooks/dilex": "*",
+        "php": ">=7.2",
+        "clearbooks/dilex": "^2.0",
         "emarref/jwt": "^1.0.3"
 
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.8"
+        "phpunit/phpunit": "^8"
     },
     "license": "LGPL-3.0",
     "authors": [
