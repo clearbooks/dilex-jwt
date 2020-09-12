@@ -6,17 +6,15 @@
  * Time: 11:44
  */
 
-namespace Clearbooks\Dilex\JwtGuard;
+namespace Clearbooks\Dilex;
 
-
-use Clearbooks\Dilex\JwtGuard;
+use Clearbooks\Dilex\JwtGuard\MockNoJwtRequiredController;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class JwtGuardTest extends TestCase
 {
-
     private $request;
 
     public function setUp(): void
@@ -46,7 +44,6 @@ class JwtGuardTest extends TestCase
     {
         $guard = new JwtGuard( new JwtGuard\RequestAuthoriserStub( false ) );
         $this->assertContains( 'error', array_keys( json_decode( $guard->execute( new Request )->getContent(), true ) ) );
-
     }
 
     /**
@@ -67,5 +64,4 @@ class JwtGuardTest extends TestCase
         $this->request->attributes->set('_controller', MockNoJwtRequiredController::class );
         $this->assertNull($guard->execute($this->request));
     }
-
 }

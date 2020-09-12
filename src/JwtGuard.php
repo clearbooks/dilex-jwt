@@ -1,11 +1,12 @@
 <?php
 namespace Clearbooks\Dilex;
+
 use Clearbooks\Dilex\JwtGuard\NoJwtRequired;
 use Clearbooks\Dilex\JwtGuard\RequestAuthoriser;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class JwtGuard implements Middleware
+class JwtGuard implements BeforeRequestListener
 {
     /**
      * @var RequestAuthoriser
