@@ -6,7 +6,7 @@ use Clearbooks\Dilex\JwtGuard\RequestAuthoriser;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class JwtGuard implements BeforeRequestListener
+class JwtGuard implements Middleware
 {
     /**
      * @var RequestAuthoriser
