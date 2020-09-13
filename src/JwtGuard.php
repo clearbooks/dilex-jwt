@@ -22,6 +22,16 @@ class JwtGuard implements Middleware
         $this->authoriser = $authoriser;
     }
 
+    private function getControllerClass( Request $request )
+    {
+        $controllerAttribute = $request->attributes->get( "_controller" );
+        if ( is_array( $controllerAttribute ) ) {
+            return $controllerAttribute[0];
+        }
+
+        return $controllerAttribute;
+    }
+
     /**
      * Authorise this request
      * @param Request $request
@@ -29,7 +39,7 @@ class JwtGuard implements Middleware
      */
     public function execute( Request $request )
     {
-        $controllerClass = $request->attributes->get('_controller')[0];
+        $controllerClass = $this->getControllerClass( $request );
         if( !($this->isJwtRequired($controllerClass))) {
             return null;
         }
