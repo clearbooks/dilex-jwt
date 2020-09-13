@@ -29,7 +29,7 @@ class JwtGuard implements Middleware
      */
     public function execute( Request $request )
     {
-        $controllerClass = $request->attributes->get('_controller');
+        $controllerClass = $request->attributes->get('_controller')[0];
         if( !($this->isJwtRequired($controllerClass))) {
             return null;
         }
