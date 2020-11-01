@@ -1,11 +1,12 @@
 {
     "name": "clearbooks/dilex-jwt",
     "description": "JWT authentication middleware for Dilex",
-    "type": "project",
+    "type": "library",
     "require": {
         "php": ">=7.2",
-        "clearbooks/dilex": "^2.0",
-        "emarref/jwt": "^1.0.3"
+        "clearbooks/dilex": "^3.0.0-alpha.1",
+        "emarref/jwt": "^1.0.3",
+        "ext-json": "*"
 
     },
     "require-dev": {

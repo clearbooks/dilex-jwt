@@ -1,5 +1,6 @@
 <?php
 namespace Clearbooks\Dilex;
+
 use Clearbooks\Dilex\JwtGuard\NoJwtRequired;
 use Clearbooks\Dilex\JwtGuard\RequestAuthoriser;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,6 +22,16 @@ class JwtGuard implements Middleware
         $this->authoriser = $authoriser;
     }
 
+    private function getControllerClass( Request $request )
+    {
+        $controllerAttribute = $request->attributes->get( "_controller" );
+        if ( is_array( $controllerAttribute ) ) {
+            return $controllerAttribute[0];
+        }
+
+        return $controllerAttribute;
+    }
+
     /**
      * Authorise this request
      * @param Request $request
@@ -28,7 +39,7 @@ class JwtGuard implements Middleware
      */
     public function execute( Request $request )
     {
-        $controllerClass = $request->attributes->get('_controller');
+        $controllerClass = $this->getControllerClass( $request );
         if( !($this->isJwtRequired($controllerClass))) {
             return null;
         }
