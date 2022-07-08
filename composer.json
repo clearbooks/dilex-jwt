@@ -4,9 +4,9 @@
     "type": "library",
     "require": {
         "php": ">=7.2",
+        "ext-json": "*",
         "clearbooks/dilex": "^3.0.0-alpha.1",
-        "emarref/jwt": "^1.0.3",
-        "ext-json": "*"
+        "firebase/php-jwt": "^6.2"
 
     },
     "require-dev": {
