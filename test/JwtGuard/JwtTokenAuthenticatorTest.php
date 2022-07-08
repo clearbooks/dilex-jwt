@@ -9,13 +9,10 @@
 namespace Clearbooks\Dilex\JwtGuard;
 
 use DateTime;
-use Emarref\Jwt\Algorithm\Hs512;
-use Emarref\Jwt\Algorithm\None;
-use Emarref\Jwt\Claim\PublicClaim;
-use Emarref\Jwt\Encryption\Factory as EncryptionFactory;
-use Emarref\Jwt\Jwt;
-use Emarref\Jwt\Token;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use Symfony\Component\HttpFoundation\Request;
 
 class JwtTokenAuthenticatorTest extends TestCase
@@ -43,9 +40,9 @@ class JwtTokenAuthenticatorTest extends TestCase
 
 
     /**
-     * @var Hs512
+     * @var Key
      */
-    private $algorithm;
+    private $key;
 
     /**
      * @var JwtTokenAuthenticator
@@ -53,7 +50,7 @@ class JwtTokenAuthenticatorTest extends TestCase
     private $auth;
 
     /**
-     * @var Token
+     * @var stdClass
      */
     private $token;
 
@@ -89,30 +86,31 @@ class JwtTokenAuthenticatorTest extends TestCase
 
     /**
      * @param array $spec
-     * @return Token
+     * @return stdClass
      */
     private function getTokenWithout( array $spec )
     {
         $mappings = [
-            self::VALID_USER_ID => new PublicClaim( 'userId', self::USER_ID ),
-            self::VALID_GROUP_ID => new PublicClaim( 'groupId', self::GROUP_ID ),
-            self::VALID_APP_ID => new PublicClaim( 'appId', self::APP_ID ),
-            self::VALID_EXPIRY_DATE => new PublicClaim('exp', $this->getNonExpiredDate()),
-            self::VALID_IS_ADMIN => new PublicClaim('isAdmin', self::IS_ADMIN),
-            self::VALID_SEGMENTS => new PublicClaim('segments', $this->testSegments)
+            self::VALID_USER_ID => [ 'userId', self::USER_ID ],
+            self::VALID_GROUP_ID => [ 'groupId', self::GROUP_ID ],
+            self::VALID_APP_ID => [ 'appId', self::APP_ID ],
+            self::VALID_EXPIRY_DATE => ['exp', $this->getNonExpiredDate()],
+            self::VALID_IS_ADMIN => ['isAdmin', self::IS_ADMIN],
+            self::VALID_SEGMENTS => ['segments', $this->testSegments]
         ];
 
         $spec = array_diff( array_keys( $mappings ), $spec );
 
-        $token = new Token;
+        $token = new stdClass();
         foreach ( $spec as $desiredClaim ) {
-            $token->addClaim( $mappings[$desiredClaim] );
+            $claim = $mappings[$desiredClaim];
+            $token->{$claim[0]} = $claim[1];
         }
         return $token;
     }
 
     /**
-     * @return Token
+     * @return stdClass
      */
     private function getTokenWithNoAppId()
     {
@@ -120,7 +118,7 @@ class JwtTokenAuthenticatorTest extends TestCase
     }
 
     /**
-     * @return Token
+     * @return stdClass
      */
     private function getTokenWithNoUserId()
     {
@@ -128,7 +126,7 @@ class JwtTokenAuthenticatorTest extends TestCase
     }
 
     /**
-     * @return Token
+     * @return stdClass
      */
     private function getTokenWithNoGroupId()
     {
@@ -136,7 +134,7 @@ class JwtTokenAuthenticatorTest extends TestCase
     }
 
     /**
-     * @return Token
+     * @return stdClass
      */
     private function getTokenWithoutSegments()
     {
@@ -144,17 +142,17 @@ class JwtTokenAuthenticatorTest extends TestCase
     }
 
     /**
-     * @return Token
+     * @return stdClass
      */
     private function getTokenWithInvalidAppId()
     {
         $token = $this->getTokenWithout( [self::VALID_APP_ID] );
-        $token->addClaim( new PublicClaim( 'appId', 'dogs' ) );
+        $token->appId = 'dogs';
         return $token;
     }
 
     /**
-     * @return Token
+     * @return stdClass
      */
     private function getValidToken()
     {
@@ -162,20 +160,20 @@ class JwtTokenAuthenticatorTest extends TestCase
     }
 
     /**
-     * @return Token
+     * @return stdClass
      */
     private function getExpiredToken()
     {
         $token = $this->getTokenWithout( [self::VALID_EXPIRY_DATE] );
-        $token->addClaim(new PublicClaim('exp', $this->getExpiredDate()));
+        $token->exp = $this->getExpiredDate();
         return $token;
     }
 
     /**
-     * @param Token $token
+     * @param stdClass $token
      * @return bool
      */
-    private function authoriseToken( Token $token )
+    private function authoriseToken( stdClass $token )
     {
         return $this->auth->isAuthorised( new MockTokenRequest( $this->serialiseToken( $token ) ) );
     }
@@ -186,7 +184,7 @@ class JwtTokenAuthenticatorTest extends TestCase
      */
     private function serialiseToken( $token )
     {
-        return ( new Jwt )->serialize( $token, EncryptionFactory::create( $this->algorithm ) );
+        return JWT::encode((array) $token, $this->key->getKeyMaterial(), $this->key->getAlgorithm());
     }
 
     /**
@@ -195,19 +193,20 @@ class JwtTokenAuthenticatorTest extends TestCase
     public function setUp(): void
     {
         $this->appIds = new StaticAppIdProvider( [self::APP_ID] );
-        $this->algorithm = new Hs512( "shhh... it's a secret" );
-        $this->auth = new JwtTokenAuthenticator( new Jwt, $this->algorithm, $this->appIds );
-        $this->token = new Token();
+        $this->key = new Key( "shhh... it's a secret", 'HS512' );
+        $this->auth = new JwtTokenAuthenticator( $this->key, $this->appIds );
+        $this->token = new stdClass();
         $this->testSegments = [ [ 'segmentId' => 1, 'isLocked' => false, 'priority' => 10 ] ];
     }
 
     /**
      * @test
      */
-    public function givenNoneAlgorithm_returnFalse()
+    public function givenNoneAlgorithm_throwsException()
     {
-        $auth = new JwtTokenAuthenticator( $jwt = new Jwt, new None, $this->appIds );
-        $this->assertFalse( $auth->isAuthorised( new MockTokenRequest( $jwt->serialize( new Token, EncryptionFactory::create( new None ) ) ) ) );
+        self::expectException(\DomainException::class);
+        $auth = new JwtTokenAuthenticator( new Key(' ', 'None'), $this->appIds );
+        $auth->isAuthorised( new MockTokenRequest( JWT::encode([], ' ', 'None')) );
     }
 
     /**
@@ -298,7 +297,7 @@ class JwtTokenAuthenticatorTest extends TestCase
      */
     public function givenTokenWithInvalidSignature_whenValidatingToken_returnFalse()
     {
-        $this->auth = new JwtTokenAuthenticator( new Jwt, new Hs512( 'Nope' ), $this->appIds );
+        $this->auth = new JwtTokenAuthenticator( new Key( 'Nope', 'HS512' ), $this->appIds );
         $this->assertFalse( $this->authoriseToken( $this->getValidToken() ) );
     }
 
