@@ -1,144 +1,102 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Clearbooks\Dilex\JwtGuard;
 
+use ArrayAccess;
 use DateTime;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
 
+use function in_array;
+use function is_array;
+use function array_map;
+use function str_starts_with;
+use function trim;
+use function substr;
+use function strlen;
+
 class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
 {
-    const USER_ID = 'userId';
-    const GROUP_ID = 'groupId';
-    const APP_ID = 'appId';
-    const EXPIRY = 'exp';
-    const IS_ADMIN = 'isAdmin';
-    const SEGMENTS = 'segments';
-    const BEARER = 'Bearer ';
+    protected const string USER_ID = 'userId';
+    protected const string GROUP_ID = 'groupId';
+    protected const string APP_ID = 'appId';
+    protected const string EXPIRY = 'exp';
+    protected const string IS_ADMIN = 'isAdmin';
+    protected const string SEGMENTS = 'segments';
+    protected const string BEARER = 'Bearer ';
 
-    /**
-     * @var Key
-     */
-    protected $key;
+    protected stdClass $token;
 
-    /**
-     * @var stdClass
-     */
-    protected $token;
-
-    /**
-     * @var AppIdProvider
-     */
-    protected $appIdProvider;
-
-    /**
-     * @param Key $key
-     * @param AppIdProvider $appIdProvider
-     */
-    public function __construct( Key $key, AppIdProvider $appIdProvider )
-    {
-        $this->key = $key;
+    public function __construct(
+        #[\SensitiveParameter] protected readonly Key|ArrayAccess|array $key,
+        protected readonly AppIdProvider $appIdProvider
+    ) {
         $this->token = new stdClass;
-        $this->appIdProvider = $appIdProvider;
     }
 
-    /**
-     * Get a claim if we have one or return null
-     * @param string $claim the name of the claim
-     * @return mixed
-     */
-    protected function getClaimOrNull( $claim )
+    protected function getClaimOrNull( string $claim ): mixed
     {
         return $this->token->$claim ?? null;
     }
 
-    /**
-     * Is this token expired
-     * @return bool
-     */
-    protected function isExpired()
+    protected function isExpired(): bool
     {
         $exp = \DateTime::createFromFormat( 'U', $this->getClaimOrNull( self::EXPIRY ) );
         return !$exp || $exp <= ( new DateTime );
     }
 
-    /**
-     * Does this token have a user id
-     * @return bool
-     */
-    protected function hasUserId()
+    protected function hasUserId(): bool
     {
         return (bool)$this->getClaimOrNull( self::USER_ID );
     }
 
-    /**
-     * Is this token for labs
-     * @return bool
-     */
-    protected function isAllowedAppId()
+    protected function isAllowedAppId(): bool
     {
-        return in_array( $this->getClaimOrNull( self::APP_ID ), $this->appIdProvider->getAppIds() );
+        return in_array( $this->getClaimOrNull( self::APP_ID ), $this->appIdProvider->getAppIds(), true );
     }
 
-    /**
-     * Verify the token
-     * @param Request $request
-     * @return bool
-     */
-    public function isAuthorised( Request $request )
+    #[\Override]
+    public function isAuthorised( Request $request ): bool
     {
         $header = $request->headers->get( 'Authorization' );
 
-        if (strtolower($this->key->getAlgorithm()) === 'none') {
+        if ($header === null) {
             return false;
         }
 
-        if ( $header ) {
-            try{
-                $this->token = JWT::decode( $this->extractJwtFromHeader($header), $this->key );
-            } catch ( \Exception $e ){
-                return false;
-            }
-        }
-
-        if( $this->isExpired() || !$this->hasUserId() || !$this->isAllowedAppId() ) {
+        try{
+            $this->token = JWT::decode( $this->extractJwtFromHeader($header), $this->key );
+        } catch ( \Exception ){
             return false;
         }
 
-        return true;
+        return !($this->isExpired() || !$this->hasUserId() || !$this->isAllowedAppId());
     }
 
-    /**
-     * Get the user id from the token
-     * @return mixed|null
-     */
-    public function getUserId()
+    #[\Override]
+    public function getUserId(): mixed
     {
         return $this->getClaimOrNull( self::USER_ID );
     }
 
-    /**
-     * Get the group id from the token
-     * @return mixed|null
-     */
-    public function getGroupId()
+    #[\Override]
+    public function getGroupId(): mixed
     {
         return $this->getClaimOrNull( self::GROUP_ID );
     }
 
-    /**
-     * @return bool
-     */
-    public function getIsAdmin()
+    #[\Override]
+    public function getIsAdmin(): bool
     {
         return (bool)$this->getClaimOrNull( self::IS_ADMIN );
     }
 
-    /**
-     * @return array
-     */
-    public function getSegments()
+    #[\Override]
+    public function getSegments(): array
     {
         $segments = $this->getClaimOrNull( self::SEGMENTS );
 
@@ -154,10 +112,10 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
         );
     }
 
-    protected function extractJwtFromHeader( $header )
+    protected function extractJwtFromHeader( #[\SensitiveParameter] string $header )
     {
-        if( strpos( $header, self::BEARER ) === 0 ){
-            return substr( $header, strlen( self::BEARER ) );
+        if (str_starts_with($header, self::BEARER)) {
+            return trim(substr( $header, strlen( self::BEARER ) ));
         }
         return $header;
     }

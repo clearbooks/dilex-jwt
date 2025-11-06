@@ -1,25 +1,19 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Clearbooks\Dilex\JwtGuard;
-
 
 class StaticAppIdProvider implements AppIdProvider
 {
     /**
-     * @var string[]
-     */
-    private $appIds;
-
-    /**
      * @param string[] $appIds
      */
-    public function __construct( array $appIds )
-    {
-        $this->appIds = $appIds;
-    }
+    public function __construct( private array $appIds )
+    {}
 
-    public function getAppIds()
+    #[\Override]
+    public function getAppIds(): array
     {
         return $this->appIds;
     }

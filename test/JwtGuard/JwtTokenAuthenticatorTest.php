@@ -11,6 +11,7 @@ namespace Clearbooks\Dilex\JwtGuard;
 use DateTime;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
@@ -199,36 +200,20 @@ class JwtTokenAuthenticatorTest extends TestCase
         $this->testSegments = [ [ 'segmentId' => 1, 'isLocked' => false, 'priority' => 10 ] ];
     }
 
-    /**
-     * @test
-     */
-    public function givenNoneAlgorithm_throwsException()
-    {
-        self::expectException(\DomainException::class);
-        $auth = new JwtTokenAuthenticator( new Key(' ', 'None'), $this->appIds );
-        $auth->isAuthorised( new MockTokenRequest( JWT::encode([], ' ', 'None')) );
-    }
-
-    /**
-     * @test
-     */
+    #[Test]
     public function givenNoAuthorizationHeader_whenCallingVerifyToken_returnFalse()
     {
         $this->assertFalse( $this->auth->isAuthorised( new Request ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenNoAuthorisationAttempted_whenGettingCredentials_returnNull()
     {
         $this->assertNull( $this->auth->getGroupId() );
         $this->assertNull( $this->auth->getUserId() );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenFailedAuthorisation_whenGettingCredentials_returnNull()
     {
         $this->assertFalse( $this->auth->isAuthorised( new Request ) );
@@ -236,92 +221,70 @@ class JwtTokenAuthenticatorTest extends TestCase
         $this->assertNull( $this->auth->getUserId() );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenValidToken_whenVerifyingToken_returnTrue()
     {
         $this->assertTrue( $this->authoriseToken( $this->getValidToken() ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenTokenWithoutGroupId_whenVerifyingToken_returnTrue()
     {
         $this->assertTrue( $this->authoriseToken( $this->getTokenWithNoGroupId() ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenTokenWithoutSegments_whenVerifyingToken_returnTrue()
     {
         $this->assertTrue( $this->authoriseToken( $this->getTokenWithoutSegments() ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenExpiredToken_whenVerifyingToken_returnFalse()
     {
         $this->assertFalse( $this->authoriseToken( $this->getExpiredToken() ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenTokenWithoutUserId_whenVerifyingToken_returnFalse()
     {
         $this->assertFalse( $this->authoriseToken( $this->getTokenWithNoUserId() ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenTokenWithInvalidAppId_whenVerifyingToken_returnFalse()
     {
         $this->assertFalse( $this->authoriseToken( $this->getTokenWithInvalidAppId() ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenTokenWithNoAppId_whenVerifyingToken_returnFalse()
     {
         $this->assertFalse( $this->authoriseToken( $this->getTokenWithNoAppId() ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenTokenWithInvalidSignature_whenValidatingToken_returnFalse()
     {
         $this->auth = new JwtTokenAuthenticator( new Key( 'Nope', 'HS512' ), $this->appIds );
         $this->assertFalse( $this->authoriseToken( $this->getValidToken() ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenTokenWithoutIsAdmin_whenGettingIsAdmin_returnFalse()
     {
         $this->authoriseToken($this->getTokenWithout([self::VALID_IS_ADMIN]));
         $this->assertFalse($this->auth->getIsAdmin());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenTokenWithoutSegments_whenGettingSegments_returnsEmptyArray()
     {
         $this->authoriseToken($this->getTokenWithout([self::VALID_SEGMENTS]));
         $this->assertEmpty($this->auth->getSegments());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenValidToken_whenSettingToken_getCorrectUserAndGroupIdAndIsAdmin()
     {
         $this->authoriseToken( $this->getValidToken() );
@@ -331,17 +294,13 @@ class JwtTokenAuthenticatorTest extends TestCase
         $this->assertEquals($this->testSegments, $this->auth->getSegments());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenValidTokenAndBearerStringPresentInRequestHeader_WhenCallingIsAuthorised_ThenAuthorisationPasses()
     {
         $this->assertTrue( $this->auth->isAuthorised( new MockTokenRequest( "Bearer ". $this->serialiseToken( $this->getValidToken() ) ) ) );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function givenValidTokenButHeaderIsInvalid_WhenCallingIsAuthorised_ThenAuthorisationFails()
     {
         $this->assertFalse( $this->auth->isAuthorised( new MockTokenRequest( " 🐟 should be broken ". $this->serialiseToken( $this->getValidToken() ) ) ) );

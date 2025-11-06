@@ -1,28 +1,25 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Clearbooks\Dilex;
 
 use Clearbooks\Dilex\JwtGuard\NoJwtRequired;
 use Clearbooks\Dilex\JwtGuard\RequestAuthoriser;
+use Closure;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+use function is_array;
+use function is_string;
 
 class JwtGuard implements Middleware
 {
-    /**
-     * @var RequestAuthoriser
-     */
-    private $authoriser;
+    public function __construct( private readonly RequestAuthoriser $authoriser )
+    {}
 
-    /**
-     * JwtGuard constructor.
-     * @param RequestAuthoriser $authoriser
-     */
-    public function __construct( RequestAuthoriser $authoriser )
-    {
-        $this->authoriser = $authoriser;
-    }
-
-    private function getControllerClass( Request $request )
+    private function getControllerClass( Request $request ): string|Closure|null
     {
         $controllerAttribute = $request->attributes->get( "_controller" );
         if ( is_array( $controllerAttribute ) ) {
@@ -32,12 +29,8 @@ class JwtGuard implements Middleware
         return $controllerAttribute;
     }
 
-    /**
-     * Authorise this request
-     * @param Request $request
-     * @return JsonResponse|null
-     */
-    public function execute( Request $request )
+    #[\Override]
+    public function execute( Request $request ): ?JsonResponse
     {
         $controllerClass = $this->getControllerClass( $request );
         if( !($this->isJwtRequired($controllerClass))) {
@@ -45,24 +38,20 @@ class JwtGuard implements Middleware
         }
 
         if( !$this->authoriser->isAuthorised( $request ) ) {
-            return new JsonResponse( ['error' => 'Invalid token'], 403 );
+            return new JsonResponse( ['error' => 'Invalid token'], Response::HTTP_FORBIDDEN );
         }
+
         return null;
     }
 
-    /**
-     * @param $controllerClass
-     * @return bool
-     */
-    private function isJwtRequired($controllerClass)
+    private function isJwtRequired(string|Closure|null $controllerClass): bool
     {
-        if ($controllerClass) {
-            $reflection = new \ReflectionClass($controllerClass);
-            $jwtRequired = !$reflection->implementsInterface(NoJwtRequired::class);
-            return $jwtRequired;
-        } else {
-            $jwtRequired = true;
-            return $jwtRequired;
+        if (!is_string($controllerClass)) {
+            return true;
         }
+
+        $reflection = new \ReflectionClass($controllerClass);
+
+        return !$reflection->implementsInterface(NoJwtRequired::class);
     }
 }
