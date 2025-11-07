@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use function in_array;
 use function is_array;
 use function array_map;
+use function is_numeric;
 use function str_starts_with;
 use function trim;
 use function substr;
@@ -45,7 +46,13 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
 
     protected function isExpired(): bool
     {
-        $exp = \DateTime::createFromFormat( 'U', $this->getClaimOrNull( self::EXPIRY ) );
+        $expiryTimestamp = $this->getClaimOrNull(self::EXPIRY);
+
+        if (!is_numeric($expiryTimestamp)) {
+            return true;
+        }
+
+        $exp = \DateTime::createFromFormat( 'U', (string) $expiryTimestamp);
         return !$exp || $exp <= ( new DateTime );
     }
 
@@ -112,7 +119,7 @@ class JwtTokenAuthenticator implements RequestAuthoriser, IdentityProvider
         );
     }
 
-    protected function extractJwtFromHeader( #[\SensitiveParameter] string $header )
+    protected function extractJwtFromHeader( #[\SensitiveParameter] string $header ): string
     {
         if (str_starts_with($header, self::BEARER)) {
             return trim(substr( $header, strlen( self::BEARER ) ));
