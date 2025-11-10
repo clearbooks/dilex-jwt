@@ -15,7 +15,7 @@ class RequestAuthoriserStub implements RequestAuthoriser
         $this->valid = $isValid;
     }
 
-    public function isAuthorised( Request $request )
+    public function isAuthorised( Request $request ): bool
     {
         return $this->valid;
     }

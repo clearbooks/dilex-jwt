@@ -1,25 +1,16 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Clearbooks\Dilex\JwtGuard;
 
 interface IdentityProvider
 {
-    /**
-     * @return string
-     */
-    public function getUserId();
+    public function getUserId(): mixed;
 
-    /**
-     * @return string
-     */
-    public function getGroupId();
+    public function getGroupId(): mixed;
 
-    /**
-     * @return bool
-     */
-    public function getIsAdmin();
+    public function getIsAdmin(): bool;
 
-    /**
-     * @return array
-     */
-    public function getSegments();
+    public function getSegments(): array;
 }
