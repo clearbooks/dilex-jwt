@@ -5,7 +5,7 @@
     "require": {
         "php": ">=8.3",
         "ext-json": "*",
-        "clearbooks/dilex": "dev-php83-plus-overhaul",
+        "clearbooks/dilex": "^4.0.0-alpha",
         "firebase/php-jwt": "^6.2"
 
     },
