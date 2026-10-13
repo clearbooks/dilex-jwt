@@ -194,7 +194,7 @@ class JwtTokenAuthenticatorTest extends TestCase
     public function setUp(): void
     {
         $this->appIds = new StaticAppIdProvider( [self::APP_ID] );
-        $this->key = new Key( "shhh... it's a secret", 'HS512' );
+        $this->key = new Key( "UcO8XjY5LRlcG6PDC6fEssWLCLmvAk4MB0AqTdk7VQXch9IDAYxQhVt3YsyUVP1q", 'HS512' );
         $this->auth = new JwtTokenAuthenticator( $this->key, $this->appIds );
         $this->token = new stdClass();
         $this->testSegments = [ [ 'segmentId' => 1, 'isLocked' => false, 'priority' => 10 ] ];
@@ -266,7 +266,7 @@ class JwtTokenAuthenticatorTest extends TestCase
     #[Test]
     public function givenTokenWithInvalidSignature_whenValidatingToken_returnFalse()
     {
-        $this->auth = new JwtTokenAuthenticator( new Key( 'Nope', 'HS512' ), $this->appIds );
+        $this->auth = new JwtTokenAuthenticator( new Key( 'XxYrnfboh8RpV6IxqpPmcetL7o9Z0Kt1wYK2bBtaPzlY7Lxab5OT3zOFvhOiIQTt', 'HS512' ), $this->appIds );
         $this->assertFalse( $this->authoriseToken( $this->getValidToken() ) );
     }
 
